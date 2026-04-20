@@ -1,0 +1,23 @@
+name: tabi_sdk
+description: >-
+  Official Dart / Flutter SDK for the Tabi WhatsApp Business Messaging API.
+version: 0.1.0
+homepage: https://tabi.africa/sdks
+repository: https://github.com/Tabi-messaging/tabi-sdk-dart.git
+issue_tracker: https://github.com/Tabi-messaging/tabi-sdk-dart/issues
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+topics:
+  - api
+  - http
+  - whatsapp
+
+dependencies:
+  dio: ^5.4.0
+  meta: ^1.11.0
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^4.0.0
