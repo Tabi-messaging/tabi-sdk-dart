@@ -38,3 +38,15 @@ git push origin v0.1.0
 ## Version bumps
 
 Update `version` in `pubspec.yaml` and add an entry in `CHANGELOG.md` before tagging.
+
+## Optional: live smoke script (maintainers)
+
+To hit the real API from a checkout (requires `TABI_API_KEY` in the environment):
+
+```bash
+export TABI_API_KEY=tk_...
+# optional: export TABI_BASE_URL=https://api.tabi.africa/api/v1
+dart run tool/smoke.dart
+```
+
+This is **not** part of the public integration docs; it only lists channels as a connectivity check.

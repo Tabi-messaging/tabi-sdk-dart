@@ -1,23 +1,39 @@
-# tabi_sdk
+# tabi_sdk (Dart / Flutter)
 
-Official **Dart / Flutter** client for the [Tabi](https://tabi.africa) WhatsApp Business Messaging API. The API surface mirrors the PHP package [`tabi/sdk`](https://packagist.org/packages/tabi/sdk): same `TabiClient` entry point and resource groups.
+Official **Dart** client for the [Tabi](https://tabi.africa) WhatsApp Business Messaging API. The same REST surface as the [PHP](https://packagist.org/packages/tabi/sdk) and [Python](https://pypi.org/project/tabi-sdk/) SDKs: one `TabiClient`, resource groups, JSON bodies that match the HTTP API.
 
-**Source repository:** [github.com/Tabi-messaging/tabi-sdk-dart](https://github.com/Tabi-messaging/tabi-sdk-dart)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) · [Repository](https://github.com/Tabi-messaging/tabi-sdk-dart)
 
-## Requirements
+## Table of contents
 
-- Dart SDK **>= 3.0.0** (Flutter projects use the same constraint in `pubspec.yaml`).
+- [Install](#install)
+- [Quick start](#quick-start)
+- [Configuration](#configuration)
+- [Where credentials come from](#where-credentials-come-from)
+- [How the client is organised](#how-the-client-is-organised)
+- [Request bodies and the full API](#request-bodies-and-the-full-api)
+- [Send message body](#send-message-body)
+- [Webhook `events`](#webhook-events)
+- [OTP over WhatsApp](#otp-over-whatsapp)
+- [Resources (all methods)](#resources-all-methods)
+- [Error handling](#error-handling)
+- [Return values](#return-values)
+- [Requirements](#requirements)
+- [Related SDKs](#related-sdks)
+- [License](#license)
 
-## Installation
+---
 
-From [pub.dev](https://pub.dev/packages/tabi_sdk) (after publish):
+## Install
+
+**pub.dev** (after the package is published):
 
 ```yaml
 dependencies:
   tabi_sdk: ^0.1.0
 ```
 
-From Git:
+**Git** (always available):
 
 ```yaml
 dependencies:
@@ -27,90 +43,442 @@ dependencies:
       ref: main
 ```
 
-Run `dart pub get`.
+Then:
+
+```bash
+dart pub get
+# or, in a Flutter app:
+flutter pub get
+```
+
+---
 
 ## Quick start
+
+Send a text message from server-side or trusted code using a **workspace or channel API key**:
 
 ```dart
 import 'package:tabi_sdk/tabi_sdk.dart';
 
-void main() async {
-  final client = TabiClient('YOUR_API_KEY');
+Future<void> main() async {
+  final client = TabiClient(
+    'tk_your_api_key',
+    baseUrl: 'https://api.tabi.africa/api/v1',
+  );
 
-  final channels = await client.channels().list();
-  print(channels);
+  await client.messages().send('your-channel-id', {
+    'to': '2348012345678',
+    'content': 'Hello from Dart!',
+  });
 }
 ```
 
-Default base URL is `https://api.tabi.africa/api/v1`. Override when needed:
+- **`to`**: digits only, international format, **no** `+` in the JSON value (same as other SDKs).
+- **`channel-id`**: from the dashboard (**Channels** → open a channel → ID in the URL or detail view).
+- **API key**: create under **Developer → API keys**. Load from environment or a secret store; do **not** embed keys in mobile or browser apps.
+
+---
+
+## Configuration
 
 ```dart
+import 'package:tabi_sdk/tabi_sdk.dart';
+
+// Resolve `apiKey` from your app: e.g. compile-time defines, env, or a secrets service.
 final client = TabiClient(
-  'YOUR_API_KEY',
+  apiKey,
   baseUrl: 'https://api.tabi.africa/api/v1',
+  connectTimeout: const Duration(seconds: 30),
+  receiveTimeout: const Duration(seconds: 30),
 );
 ```
 
-Use a **workspace or channel API key**, or a **user JWT** when an endpoint requires it. See [API docs](https://tabi.africa/api-docs).
+**Passing the key safely**
 
-## API surface
+- **CLI / tests:** `dart run --dart-define=TABI_API_KEY=tk_...` then `const String.fromEnvironment('TABI_API_KEY')`.
+- **Flutter:** [`flutter_dotenv`](https://pub.dev/packages/flutter_dotenv), `--dart-define`, or native secure storage—not hard-coded strings in source control.
+- **Server / desktop:** `dart:io` `Platform.environment['TABI_API_KEY']` where appropriate.
 
-| Resource | Method on `TabiClient` |
-|----------|-------------------------|
-| Auth | `auth()` |
-| Channels | `channels()` |
-| Messages | `messages()` |
-| Contacts | `contacts()` |
-| Conversations | `conversations()` |
-| Webhooks | `webhooks()` |
-| API keys | `apiKeys()` |
-| Files | `files()` |
-| Campaigns | `campaigns()` |
-| Automation templates | `automationTemplates()` |
-| Automation installs | `automationInstalls()` |
-| Quick replies | `quickReplies()` |
-| Analytics | `analytics()` |
-| Notifications | `notifications()` |
-| Integrations | `integrations()` |
-| Workspaces | `workspaces()` |
+Default base URL if you omit the second argument: `https://api.tabi.africa/api/v1`.
 
-## Errors
+---
 
-Failed HTTP calls throw [`TabiException`](lib/src/tabi_exception.dart): `message`, optional `statusCode`, and raw `body` when the server returned JSON.
+## Where credentials come from
 
-## Testing
+| What | Where to get it |
+|------|------------------|
+| API key or user JWT | Dashboard → **Developer** → **API keys**, or login flow for a JWT |
+| Base URL | Usually `https://api.tabi.africa/api/v1` (default in the client) |
+| Channel ID | **Channels** → open a channel → copy the ID from the URL or screen |
 
-Inject a custom [`TabiHttpClient`](lib/src/tabi_http_client.dart) (for example with a `Dio` instance that uses a stub `HttpClientAdapter`) via [`TabiClient.withHttp`](lib/src/tabi_client.dart). See `test/tabi_http_client_test.dart`.
+Some operations (for example creating API keys) require a **user JWT**, not a channel key. The method descriptions below mention that where it matters.
 
-## Live smoke check (optional)
+---
 
-From the repository root, with real credentials (do not commit secrets):
+## How the client is organised
 
-```bash
-export TABI_API_KEY=your_key
-# optional:
-# export TABI_BASE_URL=https://api.tabi.africa/api/v1
+`TabiClient` exposes **resource groups**. Each group maps to an area of the REST API (same idea as PHP `->messages()` and Python `client.messages`).
 
-dart run tool/smoke.dart
+| Group on `TabiClient` | REST areas |
+|----------------------|------------|
+| `auth()`, `workspaces()` | Auth, workspaces, members, invites |
+| `channels()`, `messages()`, `conversations()`, `contacts()`, `quickReplies()`, `notifications()` | Lines, sends, inbox, people, shortcuts |
+| `automationTemplates()`, `automationInstalls()`, `campaigns()` | Template catalog, installed flows, broadcasts |
+| `apiKeys()`, `webhooks()`, `integrations()` | API keys (JWT for create), webhooks, third-party links |
+| `files()`, `analytics()` | Uploads, metrics |
+
+Method names in Dart are **camelCase**. JSON keys in maps are **exactly** as in the HTTP API (camelCase), e.g. `refreshToken`, `assignedTo`.
+
+---
+
+## Request bodies and the full API
+
+Use this README for **copy-paste examples**, the **`messages().send` table** below, **webhook event names**, and the **Resources** section.
+
+For **every** optional field, enum, query parameter, and response shape, use the **Dashboard → Developer → API reference** (OpenAPI) as the source of truth.
+
+---
+
+## Send message body
+
+Maps to `POST /channels/{channelId}/send` (`messages().send` in this SDK).
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `to` | yes | Recipient phone: digits only, international, no leading `+` in JSON. |
+| `content` | yes | Text or caption, up to 4096 characters. |
+| `messageType` | no | `text` (default), `image`, `video`, `audio`, `document`. |
+| `mediaUrl` | for media | Public URL or base64 data URI when `messageType` is not `text`. |
+| `messageClass` | no | e.g. `transactional` (typical for API), `conversational_reply`, `triggered_followup`, `broadcast`. |
+| `contactName` | no | Display name when creating a new contact. |
+| `channelId` | no | If set, must match the channel in the URL. |
+
+Stickers, polls, location, contacts, reactions, etc. use **other** methods on `messages()` (see [Resources](#resources-all-methods)); see OpenAPI for their bodies.
+
+---
+
+## Webhook `events`
+
+When creating a webhook subscription, pass a list of event names. Use `*` for all. Common values:
+
+| Event | Meaning |
+|-------|---------|
+| `message.inbound` | New inbound message on a channel. |
+| `message.status` | Outbound status update (delivered, read, failed, …). |
+| `conversation.created` | New conversation. |
+
+Payload shape: `{ "event": "<name>", "data": { ... }, "timestamp": "<ISO8601>" }`. Verify signatures with your subscription secret (see API reference).
+
+---
+
+## OTP over WhatsApp
+
+### Hosted OTP (recommended)
+
+The API can generate the code, store a hash, send WhatsApp, and verify—use the same credential as for `messages().send` (for example workspace API key with `messages:send`).
+
+```dart
+await client.channels().sendOtp('channel-uuid', {
+  'phone': '+2347000000000',
+});
+
+await client.channels().verifyOtp('channel-uuid', {
+  'phone': '+2347000000000',
+  'code': '123456',
+});
 ```
 
-The script lists channels and prints JSON or a clear error.
+REST: `POST /channels/{channelId}/otp/send`, `POST /channels/{channelId}/otp/verify`.
 
-## Development
+**Security:** call these only from **your backend**. Never put the Tabi API key in a mobile or web client; the customer app talks to your server, and your server calls Tabi.
 
-```bash
-git clone https://github.com/Tabi-messaging/tabi-sdk-dart.git
-cd tabi-sdk-dart
-dart pub get
-dart analyze
-dart test
+### Compliance
+
+- OTP uses the same WhatsApp Business channel and rate limits as other sends.
+- Follow Meta / WhatsApp policies for templates, opt-in, and WABA setup ([Meta docs](https://developers.facebook.com/docs/whatsapp)).
+- Use OTP only for real verification flows (e.g. sign-in), not for cold outreach or marketing.
+
+### Custom OTP (without hosted routes)
+
+Generate codes, hash them, store them in your database or Redis, then send the text with `messages().send` and `messageClass` appropriate for transactional traffic. The Python SDK documents a full DIY pattern with helpers; in Dart you implement storage yourself and use the same JSON bodies as in OpenAPI.
+
+---
+
+## Resources (all methods)
+
+### Auth
+
+Login, register, tokens, session, invite preview.
+
+```dart
+await client.auth().login('user@example.com', 'password');
+await client.auth().register({...});
+await client.auth().refresh('refresh_token_from_api');
+await client.auth().me();
+await client.auth().logout();
+await client.auth().invitePreview('invite_token');
 ```
 
-CI runs `dart pub get`, `dart analyze`, and `dart test` on push and pull requests.
+### Channels
 
-## Publishing (maintainers)
+```dart
+await client.channels().list();
+await client.channels().get('channel-id');
+await client.channels().create({'name': 'Support', 'provider': 'messaging'});
+await client.channels().connect('channel-id');
+await client.channels().connect('channel-id', {'optional': 'body'});
+await client.channels().disconnect('channel-id');
+await client.channels().status('channel-id');
+await client.channels().update('channel-id', {'name': 'Renamed'});
+await client.channels().reconnect('channel-id');
+await client.channels().delete('channel-id');
 
-See [PUBLISHING.md](PUBLISHING.md).
+await client.channels().sendOtp('channel-id', {'phone': '+2347000000000'});
+await client.channels().verifyOtp('channel-id', {
+  'phone': '+2347000000000',
+  'code': '123456',
+});
+```
+
+`update` typically needs a **user JWT** (not only a channel key)—see OpenAPI.
+
+### Messages
+
+```dart
+await client.messages().send('channel-id', {
+  'to': '2347000000000',
+  'content': 'Hello',
+  'messageClass': 'transactional',
+});
+
+await client.messages().send('channel-id', {
+  'to': '2347000000000',
+  'content': 'See image',
+  'messageType': 'image',
+  'mediaUrl': 'https://cdn.example.com/a.png',
+});
+
+await client.messages().get('message-id');
+await client.messages().listByConversation('conversation-id', {'page': 1, 'limit': 50});
+await client.messages().reply('conversation-id', {'content': 'Reply text'});
+
+await client.messages().sendSticker('channel-id', {...});
+await client.messages().sendContact('channel-id', {...});
+await client.messages().sendLocation('channel-id', {
+  'to': '234...',
+  'latitude': 6.5,
+  'longitude': 3.3,
+});
+await client.messages().sendPoll('channel-id', {...});
+await client.messages().react('channel-id', 'message-id', {'emoji': '👍'});
+await client.messages().markRead('channel-id', 'message-id');
+await client.messages().revoke('channel-id', 'message-id');
+await client.messages().edit('channel-id', 'message-id', {'content': 'Edited'});
+await client.messages().downloadMedia('channel-id', 'message-id');
+```
+
+### Contacts
+
+```dart
+await client.contacts().list({'page': 1, 'search': 'John'});
+await client.contacts().get('contact-id');
+await client.contacts().create({'phone': '2347000000000', 'firstName': 'Jane'});
+await client.contacts().update('contact-id', {'firstName': 'Janet'});
+await client.contacts().delete('contact-id');
+await client.contacts().import({'contacts': []});
+await client.contacts().getTags('contact-id');
+await client.contacts().addTag('contact-id', 'vip');
+await client.contacts().removeTag('contact-id', 'vip');
+await client.contacts().optIn('contact-id');
+await client.contacts().optOut('contact-id');
+```
+
+### Conversations
+
+```dart
+await client.conversations().list({'status': 'open', 'page': 1});
+await client.conversations().get('conversation-id');
+await client.conversations().update('conversation-id', {'assignedTo': 'member-uuid'});
+await client.conversations().resolve('conversation-id');
+await client.conversations().reopen('conversation-id');
+await client.conversations().markRead('conversation-id');
+```
+
+### Webhooks
+
+```dart
+await client.webhooks().create({...});
+await client.webhooks().list();
+await client.webhooks().get('id');
+await client.webhooks().update('id', {...});
+await client.webhooks().delete('id');
+await client.webhooks().ping('id');
+await client.webhooks().rotateSecret('id');
+await client.webhooks().deliveryLogs({'page': 1});
+await client.webhooks().startTestCapture({...});
+await client.webhooks().stopTestCapture({...});
+await client.webhooks().testCaptureStatus({...});
+```
+
+### API keys
+
+Creating keys requires a **user JWT**, not a workspace API key.
+
+```dart
+await client.apiKeys().create({
+  'name': 'Production',
+  'scopes': ['messages:send', 'channels:read'],
+});
+await client.apiKeys().list();
+await client.apiKeys().revoke('key-id');
+await client.apiKeys().delete('key-id');
+```
+
+### Files
+
+```dart
+await client.files().list();
+await client.files().get('file-id');
+await client.files().getUrl('file-id');
+await client.files().delete('file-id');
+```
+
+### Campaigns
+
+```dart
+await client.campaigns().create({...});
+await client.campaigns().list({'page': 1});
+await client.campaigns().get('id');
+await client.campaigns().update('id', {...});
+await client.campaigns().delete('id');
+await client.campaigns().schedule('id');
+await client.campaigns().pause('id');
+await client.campaigns().resume('id');
+await client.campaigns().cancel('id');
+```
+
+### Automation templates
+
+```dart
+await client.automationTemplates().list();
+await client.automationTemplates().get('template-id');
+```
+
+### Automation installs
+
+```dart
+await client.automationInstalls().install({...});
+await client.automationInstalls().list();
+await client.automationInstalls().get('id');
+await client.automationInstalls().update('id', {...});
+await client.automationInstalls().enable('id');
+await client.automationInstalls().disable('id');
+await client.automationInstalls().uninstall('id');
+```
+
+### Quick replies
+
+```dart
+await client.quickReplies().list();
+await client.quickReplies().create({'shortcut': '/hi', 'body': 'Hello!'});
+await client.quickReplies().update('id', {'body': '...'});
+await client.quickReplies().delete('id');
+```
+
+### Analytics
+
+```dart
+await client.analytics().dashboard({'from': '2026-01-01', 'to': '2026-01-31'});
+await client.analytics().channels({...});
+await client.analytics().conversations({...});
+```
+
+### Notifications
+
+```dart
+await client.notifications().list({'page': 1});
+await client.notifications().markRead('id');
+await client.notifications().markAllRead();
+await client.notifications().unreadCount();
+```
+
+### Integrations
+
+```dart
+await client.integrations().listProviders();
+await client.integrations().create({...});
+await client.integrations().list();
+await client.integrations().get('id');
+await client.integrations().update('id', {...});
+await client.integrations().delete('id');
+await client.integrations().test('id');
+```
+
+### Workspaces
+
+```dart
+await client.workspaces().list();
+await client.workspaces().get('workspace-id');
+await client.workspaces().create({'name': 'Team'});
+await client.workspaces().update('workspace-id', {'name': 'Renamed'});
+await client.workspaces().listMembers('workspace-id');
+await client.workspaces().inviteMember('workspace-id', {
+  'email': 'member@example.com',
+  'roleSlug': 'admin',
+});
+```
+
+---
+
+## Error handling
+
+Failed calls throw `TabiException` with `message`, `statusCode`, and optional `body` (decoded JSON when the API returns JSON).
+
+```dart
+import 'package:tabi_sdk/tabi_sdk.dart';
+
+try {
+  await client.messages().send('channel-id', {'to': '234...', 'content': 'Hi'});
+} on TabiException catch (e) {
+  print('${e.statusCode} ${e.message}');
+  print(e.body);
+}
+```
+
+| Status | Typical cause |
+|--------|----------------|
+| `400` | Invalid payload |
+| `401` | Bad or expired credential |
+| `403` | Missing scope |
+| `404` | Not found |
+| `429` | Rate limited |
+| `500` | Server error |
+
+On `429`, back off; do not retry in a tight loop.
+
+---
+
+## Return values
+
+Successful responses are **decoded JSON** (`Map`, `List`, or scalar) after the API envelope is unwrapped. Exact shapes match the OpenAPI schemas for each endpoint.
+
+---
+
+## Requirements
+
+- Dart SDK **>= 3.0.0** (Flutter apps use the same `environment` constraint in `pubspec.yaml`).
+- Dependency: **`dio`** (HTTP client).
+
+---
+
+## Related SDKs
+
+- **PHP:** [`tabi/sdk` on Packagist](https://packagist.org/packages/tabi/sdk)
+- **Python:** [`tabi-sdk` on PyPI](https://pypi.org/project/tabi-sdk/)
+- **JavaScript / TypeScript:** [`tabi-sdk` on npm](https://www.npmjs.com/package/tabi-sdk)
+- **HTTP reference:** [tabi.africa API docs](https://tabi.africa/api-docs)
+
+---
 
 ## License
 
