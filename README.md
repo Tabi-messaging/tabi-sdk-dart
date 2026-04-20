@@ -6,7 +6,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Tabi-messaging/tabi-sdk-dart/blob/main/LICENSE)
 [![API docs](https://img.shields.io/badge/API-docs-055799.svg)](https://pub.dev/documentation/tabi_sdk/latest/)
 
-**Links:** [Tabi](https://tabi.africa) · [HTTP / OpenAPI reference](https://tabi.africa/api-docs) · [Repository](https://github.com/Tabi-messaging/tabi-sdk-dart) · [Issue tracker](https://github.com/Tabi-messaging/tabi-sdk-dart/issues)
+**Links:** [Tabi](https://tabi.africa) · [HTTP / OpenAPI reference](https://tabi.africa/api-docs) · [Repository](https://github.com/Tabi-messaging/tabi-sdk-dart) · [Issue tracker](https://github.com/Tabi-messaging/tabi-sdk-dart/issues) · [Author](#author)
 
 **Search keywords:** WhatsApp API, WhatsApp Business API, messaging, Tabi, Flutter SDK, Dart HTTP client.
 
@@ -26,6 +26,7 @@
 - [Return values](#return-values)
 - [Requirements](#requirements)
 - [API documentation (dartdoc)](#api-documentation-dartdoc)
+- [Author](#author)
 - [Support](#support)
 - [Related SDKs](#related-sdks)
 - [License](#license)
@@ -487,6 +488,16 @@ After you add the dependency, browse generated docs on pub.dev:
 **[pub.dev/documentation/tabi_sdk](https://pub.dev/documentation/tabi_sdk/latest/)**
 
 That page lists `TabiClient`, resource classes, and methods. For request/response field details, use the [OpenAPI reference](https://tabi.africa/api-docs) in the Tabi dashboard.
+
+---
+
+## Author
+
+**Timothy Dake**
+
+- **LinkedIn:** [linkedin.com/in/timothy-dake-14801571](https://www.linkedin.com/in/timothy-dake-14801571/)
+- **X (Twitter):** [@timothydake](https://x.com/timothydake)
+- **Email:** [timdake4@gmail.com](mailto:timdake4@gmail.com)
 
 ---
 
