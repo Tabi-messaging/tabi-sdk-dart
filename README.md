@@ -34,7 +34,7 @@
 
 ## Install
 
-**pub.dev** (after the package is published):
+**pub.dev:**
 
 ```yaml
 dependencies:
