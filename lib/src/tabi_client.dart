@@ -16,11 +16,13 @@ import 'resources/webhooks.dart';
 import 'resources/workspaces.dart';
 import 'tabi_http_client.dart';
 
-/// Tabi API client. Same surface as the PHP SDK (`tabi/sdk`).
+/// High-level client for the Tabi HTTP API (same resource layout as the PHP `tabi/sdk` package).
 ///
-/// Pass a workspace or channel API key, or a user JWT when an endpoint requires it.
+/// Use a **workspace or channel API key** for most calls. Some routes (for example
+/// creating API keys) require a **user JWT** instead—see the package README.
 ///
-/// See https://tabi.africa/api-docs
+/// **API docs:** [pub.dev documentation](https://pub.dev/documentation/tabi_sdk/latest/).
+/// **HTTP docs:** [OpenAPI / API reference](https://tabi.africa/api-docs).
 class TabiClient {
   TabiClient(
     String apiKey, {
@@ -57,11 +59,9 @@ class TabiClient {
 
   Campaigns campaigns() => Campaigns(_http);
 
-  AutomationTemplates automationTemplates() =>
-      AutomationTemplates(_http);
+  AutomationTemplates automationTemplates() => AutomationTemplates(_http);
 
-  AutomationInstalls automationInstalls() =>
-      AutomationInstalls(_http);
+  AutomationInstalls automationInstalls() => AutomationInstalls(_http);
 
   QuickReplies quickReplies() => QuickReplies(_http);
 

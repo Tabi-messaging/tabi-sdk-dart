@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Broadcast campaigns: schedule, pause, resume (`/campaigns/*`).
 class Campaigns {
   Campaigns(this._http);
   final TabiHttpClient _http;
@@ -17,8 +18,7 @@ class Campaigns {
 
   Future<dynamic> delete(String id) => _http.delete('/campaigns/$id');
 
-  Future<dynamic> schedule(String id) =>
-      _http.post('/campaigns/$id/schedule');
+  Future<dynamic> schedule(String id) => _http.post('/campaigns/$id/schedule');
 
   Future<dynamic> pause(String id) => _http.post('/campaigns/$id/pause');
 

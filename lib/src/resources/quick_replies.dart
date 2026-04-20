@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Canned replies / shortcuts (`/quick-replies/*`).
 class QuickReplies {
   QuickReplies(this._http);
   final TabiHttpClient _http;

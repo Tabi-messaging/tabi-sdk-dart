@@ -1,8 +1,14 @@
 # tabi_sdk (Dart / Flutter)
 
-Official **Dart** client for the [Tabi](https://tabi.africa) WhatsApp Business Messaging API. The same REST surface as the [PHP](https://packagist.org/packages/tabi/sdk) and [Python](https://pypi.org/project/tabi-sdk/) SDKs: one `TabiClient`, resource groups, JSON bodies that match the HTTP API.
+**Tabi** is a WhatsApp Business messaging platform. This package is the official **Dart / Flutter** client: send messages, manage channels, webhooks, campaigns, and automations using the same JSON bodies as the [PHP](https://packagist.org/packages/tabi/sdk) and [Python](https://pypi.org/project/tabi-sdk/) SDKs.
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE) · [Repository](https://github.com/Tabi-messaging/tabi-sdk-dart)
+[![pub package](https://img.shields.io/pub/v/tabi_sdk.svg)](https://pub.dev/packages/tabi_sdk)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/Tabi-messaging/tabi-sdk-dart/blob/main/LICENSE)
+[![API docs](https://img.shields.io/badge/API-docs-055799.svg)](https://pub.dev/documentation/tabi_sdk/latest/)
+
+**Links:** [Tabi](https://tabi.africa) · [HTTP / OpenAPI reference](https://tabi.africa/api-docs) · [Repository](https://github.com/Tabi-messaging/tabi-sdk-dart) · [Issue tracker](https://github.com/Tabi-messaging/tabi-sdk-dart/issues)
+
+**Search keywords:** WhatsApp API, WhatsApp Business API, messaging, Tabi, Flutter SDK, Dart HTTP client.
 
 ## Table of contents
 
@@ -19,6 +25,8 @@ Official **Dart** client for the [Tabi](https://tabi.africa) WhatsApp Business M
 - [Error handling](#error-handling)
 - [Return values](#return-values)
 - [Requirements](#requirements)
+- [API documentation (dartdoc)](#api-documentation-dartdoc)
+- [Support](#support)
 - [Related SDKs](#related-sdks)
 - [License](#license)
 
@@ -468,6 +476,24 @@ Successful responses are **decoded JSON** (`Map`, `List`, or scalar) after the A
 
 - Dart SDK **>= 3.0.0** (Flutter apps use the same `environment` constraint in `pubspec.yaml`).
 - Dependency: **`dio`** (HTTP client).
+- **Platforms:** Android, iOS, Linux, macOS, Web, and Windows (pure Dart + `dio`; no `dart:io` in `lib/`).
+
+---
+
+## API documentation (dartdoc)
+
+After you add the dependency, browse generated docs on pub.dev:
+
+**[pub.dev/documentation/tabi_sdk](https://pub.dev/documentation/tabi_sdk/latest/)**
+
+That page lists `TabiClient`, resource classes, and methods. For request/response field details, use the [OpenAPI reference](https://tabi.africa/api-docs) in the Tabi dashboard.
+
+---
+
+## Support
+
+- **Bugs and feature requests:** [GitHub issues](https://github.com/Tabi-messaging/tabi-sdk-dart/issues)
+- **Product / API questions:** [tabi.africa](https://tabi.africa) and in-dashboard **Developer → API reference**
 
 ---
 
@@ -482,4 +508,4 @@ Successful responses are **decoded JSON** (`Map`, `List`, or scalar) after the A
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](https://github.com/Tabi-messaging/tabi-sdk-dart/blob/main/LICENSE).

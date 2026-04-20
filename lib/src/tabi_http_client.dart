@@ -2,7 +2,10 @@ import 'package:dio/dio.dart';
 
 import 'tabi_exception.dart';
 
-/// Low-level HTTP client: Bearer auth, JSON, unwrap `{ success, data }` envelope.
+/// HTTP transport: Bearer token, JSON, unwraps the `{ success, data }` response envelope.
+///
+/// Most apps use [TabiClient] only. Use this class for tests ([TabiHttpClient.withDio])
+/// or custom [Dio] configuration.
 class TabiHttpClient {
   final Dio _dio;
 
@@ -31,9 +34,7 @@ class TabiHttpClient {
 
   /// Visible for tests: unwrap API envelope.
   static dynamic unwrapEnvelope(dynamic json) {
-    if (json is Map &&
-        json['success'] == true &&
-        json.containsKey('data')) {
+    if (json is Map && json['success'] == true && json.containsKey('data')) {
       return json['data'];
     }
     return json;

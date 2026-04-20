@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Uploaded files: list, metadata, signed URLs (`/files/*`).
 class Files {
   Files(this._http);
   final TabiHttpClient _http;

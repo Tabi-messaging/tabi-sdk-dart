@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Workspaces and members (`/workspaces/*`).
 class Workspaces {
   Workspaces(this._http);
   final TabiHttpClient _http;

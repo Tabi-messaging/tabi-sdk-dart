@@ -1,0 +1,6 @@
+# Keep the published tarball lean: maintainer-only files (see also package layout).
+PUBLISHING.md
+tool/
+
+# pub.dev generates API docs from source; do not ship local `dart doc` output.
+doc/

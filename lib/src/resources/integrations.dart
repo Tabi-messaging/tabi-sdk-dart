@@ -1,11 +1,11 @@
 import '../tabi_http_client.dart';
 
+/// Third-party integrations (`/integrations/*`).
 class Integrations {
   Integrations(this._http);
   final TabiHttpClient _http;
 
-  Future<dynamic> listProviders() =>
-      _http.get('/integrations/providers');
+  Future<dynamic> listProviders() => _http.get('/integrations/providers');
 
   Future<dynamic> create(Map<String, dynamic> data) =>
       _http.post('/integrations', data);

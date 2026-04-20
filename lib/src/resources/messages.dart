@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Outbound and thread messaging: send, reply, media, reactions (`/channels/.../send`, etc.).
 class Messages {
   Messages(this._http);
   final TabiHttpClient _http;
@@ -40,13 +41,11 @@ class Messages {
         data,
       );
 
-  Future<dynamic> markRead(String channelId, String messageId) =>
-      _http.post(
+  Future<dynamic> markRead(String channelId, String messageId) => _http.post(
         '/channels/$channelId/messaging/messages/$messageId/mark-read',
       );
 
-  Future<dynamic> revoke(String channelId, String messageId) =>
-      _http.post(
+  Future<dynamic> revoke(String channelId, String messageId) => _http.post(
         '/channels/$channelId/messaging/messages/$messageId/revoke',
       );
 

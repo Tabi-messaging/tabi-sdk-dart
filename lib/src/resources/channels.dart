@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// WhatsApp channels: connect, status, hosted OTP (`/channels/*`).
 class Channels {
   Channels(this._http);
   final TabiHttpClient _http;
@@ -22,8 +23,7 @@ class Channels {
   Future<dynamic> update(String id, Map<String, dynamic> data) =>
       _http.patch('/channels/$id', data);
 
-  Future<dynamic> reconnect(String id) =>
-      _http.post('/channels/$id/reconnect');
+  Future<dynamic> reconnect(String id) => _http.post('/channels/$id/reconnect');
 
   Future<dynamic> delete(String id) => _http.delete('/channels/$id');
 

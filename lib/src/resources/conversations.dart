@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Conversations (inbox threads): list, resolve, read (`/conversations/*`).
 class Conversations {
   Conversations(this._http);
   final TabiHttpClient _http;
@@ -15,9 +16,7 @@ class Conversations {
   Future<dynamic> resolve(String id) =>
       _http.post('/conversations/$id/resolve');
 
-  Future<dynamic> reopen(String id) =>
-      _http.post('/conversations/$id/reopen');
+  Future<dynamic> reopen(String id) => _http.post('/conversations/$id/reopen');
 
-  Future<dynamic> markRead(String id) =>
-      _http.post('/conversations/$id/read');
+  Future<dynamic> markRead(String id) => _http.post('/conversations/$id/read');
 }

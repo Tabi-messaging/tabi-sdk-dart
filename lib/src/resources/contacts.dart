@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Contacts: CRUD, import, tags, opt-in/out (`/contacts/*`).
 class Contacts {
   Contacts(this._http);
   final TabiHttpClient _http;

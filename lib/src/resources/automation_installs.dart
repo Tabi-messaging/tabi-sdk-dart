@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Installed automations per workspace (`/automation-installs/*`).
 class AutomationInstalls {
   AutomationInstalls(this._http);
   final TabiHttpClient _http;

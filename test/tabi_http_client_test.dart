@@ -78,15 +78,17 @@ void main() {
       await expectLater(
         http.post('/channels/c/send', <String, dynamic>{}),
         throwsA(
-          isA<TabiException>().having(
-            (TabiException e) => e.statusCode,
-            'statusCode',
-            400,
-          ).having(
-            (TabiException e) => e.message,
-            'message',
-            'Bad payload',
-          ),
+          isA<TabiException>()
+              .having(
+                (TabiException e) => e.statusCode,
+                'statusCode',
+                400,
+              )
+              .having(
+                (TabiException e) => e.message,
+                'message',
+                'Bad payload',
+              ),
         ),
       );
     });

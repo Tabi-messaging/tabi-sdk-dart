@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Analytics dashboards and breakdowns (`/analytics/*`).
 class Analytics {
   Analytics(this._http);
   final TabiHttpClient _http;

@@ -1,5 +1,6 @@
 import '../tabi_http_client.dart';
 
+/// Outbound webhooks: subscriptions, secrets, delivery logs (`/webhooks/*`).
 class Webhooks {
   Webhooks(this._http);
   final TabiHttpClient _http;
